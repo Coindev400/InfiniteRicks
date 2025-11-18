@@ -18,7 +18,7 @@ Copyright © 2012-2014 The NovaCoin developers
 Copyright © 2014 The InfiniteRicks developers</source>
         <translation>Copyright © 2009-2014 The Bitcoin developers
 Copyright © 2012-2014 The NovaCoin developers
-Copyright © 2014 The InfiniteRicks developers</translation>
+Copyright © 2014-2025 The InfiniteRicks developers</translation>
     </message>
     <message>
         <location line="+15"/>
