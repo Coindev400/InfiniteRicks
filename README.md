@@ -1,4 +1,4 @@
-![alt text](http://infiniteblocks.space/images/logo.png)  
+![alt text]([http://infiniteblocks.space/images/logo.png](https://infinitericks.com/wp-content/uploads/2024/10/cropped-logoricks.png))  
                 
                 
                 
@@ -10,7 +10,6 @@ Type	PoS
 Coin name	InfiniteRicks
 
 Coin abbreviation	RICK
-
 
 Address letter	1
 
@@ -25,23 +24,15 @@ RPC port	31648
 P2P port	31647
 
 
-
 Blockexplorer 
-http://infiniteblocks.space
+https://explorer.infinitericks.com
 
 Official Website 
-https://infinitericks.space/
-
-
-
-
-
-
-
+https://infinitericks.com
 
 
 How to compile and use the Linux Deamon
-Tested and working on Ubtunu 14 - 16.04 and 17. Version 16.04 is recommended. Versions 18.04 and later do not currently compile due to changes in OpenSSL 1.1 and the Boost C++ library in that version.
+Tested and working on Ubtunu 14 - 16.04 and 18. Version 16.04 is recommended. Versions 20.04 and later do not currently compile due to changes in OpenSSL 1.1 and the Boost C++ library in that version.
 
 Swapfile
 You can check if your server has a swap file already with the swapon command. If your system has less than 1.5GB of memory, you'll want at least a 2GB swap area. Add a new swapfile with:
@@ -83,7 +74,7 @@ If you get an error mentioning lock files, you probably have a desktop or backgr
 Pull the source code from github, or download it yourself:
 
 
-git clone https://github.com/michnkeks/InfiniteRicks.git
+git clone https://github.com/Coindev400/InfiniteRicks.git
 
 
 Compiling the software
@@ -167,27 +158,11 @@ addnode=31.220.54.64
 
 --------------------------------------------
 
-
-
-
 Command summary
 Type:
 
 InfiniteRicksd help
 for a full list of commands available.
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 InfiniteRicks development tree
@@ -230,10 +205,10 @@ Debian
 
 First, make sure that the required packages for Qt5 development of your distribution are installed, for Debian and Ubuntu these are:
 
-apt-get install qt5-default qt5-qmake qtbase5-dev-tools qttools5-dev-tools \
-    build-essential libboost-dev libboost-system-dev \
-    libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev \
-    libssl-dev libdb++-dev
+apt-get install qt5-default qt5-qmake qtbase5-dev-tools qttools5-dev-tools
+apt-get install build-essential libboost-dev libboost-system-dev
+apt-get install libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev
+apt-get install libssl-dev libdb++-dev
 
  This Step is needed as well
  sudo apt-get install libqt4-dev libminiupnpc-dev
