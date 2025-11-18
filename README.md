@@ -1,4 +1,4 @@
-![alt text]([http://infiniteblocks.space/images/logo.png](https://infinitericks.com/wp-content/uploads/2024/10/cropped-logoricks.png))  
+![alt text](https://infinitericks.com/wp-content/uploads/2024/10/cropped-logoricks.png)  
                 
                 
                 
