@@ -772,14 +772,14 @@ qrc_bitcoin.cpp: src/qt/bitcoin.qrc \
 		src/qt/res/icons/clock4.png \
 		src/qt/res/icons/clock5.png \
 		src/qt/res/icons/qrcode.png \
-		src/qt/res/icons/novacoin-16.png \
-		src/qt/res/icons/novacoin-80.png \
+		src/qt/res/icons/infiniterickscoin-16.png \
+		src/qt/res/icons/infiniterickscoin-80.png \
 		src/qt/res/icons/tx_inout.png \
 		src/qt/res/icons/remove.png \
 		src/qt/res/icons/key.png \
-		src/qt/res/icons/novacoin-16.png \
+		src/qt/res/icons/infiniterickscoin-16.png \
 		src/qt/res/icons/lock_open.png \
-		src/qt/res/icons/novacoin-80.png \
+		src/qt/res/icons/infiniterickscoin-80.png \
 		src/qt/res/icons/tx_input.png \
 		src/qt/res/icons/debugwindow.png \
 		src/qt/res/icons/tx_output.png \
