@@ -66,7 +66,7 @@ public:
     __int128 getBalance() const;
     __int128 getStake() const;
     __int128 getUnconfirmedBalance() const;
-    qint64 getImmatureBalance() const;
+    __int128 getImmatureBalance() const;
     int getNumTransactions() const;
     EncryptionStatus getEncryptionStatus() const;
 
