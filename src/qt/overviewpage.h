@@ -27,7 +27,7 @@ public:
     void showOutOfSyncWarning(bool fShow);
 
 public slots:
-    void setBalance(__int128 balance, __int1284 stake, __int128 unconfirmedBalance, __int128 immatureBalance);
+    void setBalance(__int128 balance, __int128 stake, __int128 unconfirmedBalance, __int128 immatureBalance);
 
 signals:
     void transactionClicked(const QModelIndex &index);
