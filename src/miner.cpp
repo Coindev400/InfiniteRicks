@@ -110,9 +110,9 @@ public:
 CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake, int64_t* pFees)
 {
     // Create new block
-    auto_ptr<CBlock> pblock(new CBlock());
-    if (!pblock.get())
-        return NULL;
+    std::unique_ptr<CBlock> pblock = std::make_unique<CBlock>();
+if (!pblock)
+    return nullptr;
 
     CBlockIndex* pindexPrev = pindexBest;
 
