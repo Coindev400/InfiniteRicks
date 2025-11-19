@@ -111,7 +111,7 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake, int64_t* pFees)
 {
     // Create new block
     std::unique_ptr<CBlock> pblock = std::make_unique<CBlock>();
-if (!pblock)
+    if (!pblock)
     return nullptr;
 
     CBlockIndex* pindexPrev = pindexBest;
