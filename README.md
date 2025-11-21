@@ -31,145 +31,99 @@ Official Website
 https://infinitericks.com
 
 
-How to compile and use the Linux Deamon
+##How to compile and use the Linux Deamon
 Tested and working on Ubtunu 14 - 16.04 and 18. Version 16.04 is recommended. Versions 20.04 and later do not currently compile due to changes in OpenSSL 1.1 and the Boost C++ library in that version.
 
-Swapfile
-You can check if your server has a swap file already with the swapon command. If your system has less than 1.5GB of memory, you'll want at least a 2GB swap area. Add a new swapfile with:
-
+### Swapfile
+You can check if your server has a swap file already with the ```swapon``` command.  If your system has less than 1.5GB of memory, you'll want at least a 2GB swap area.  Add a new swapfile with:
+```
 sudo fallocate -l 2G /swapfile
-
 sudo chown root:root /swapfile
-
 sudo chmod 0600 /swapfile
-
 sudo bash -c "echo 'vm.swappiness = 10' >> /etc/sysctl.conf"
-
 sudo mkswap /swapfile
-
 sudo swapon /swapfile
-
-
-
+```
 If fallocate doesn’t work, you can instead use:
-
-
+```
 sudo dd if=/dev/zero of=/swapfile bs=1024 count=1024288
-
-
-
+```
 Initialize the swapfile to mount automatically on boot:
-
-
+```
 sudo echo '/swapfile none swap sw 0 0' >> /etc/fstab
+```
 
-------------Install all required dependencies
+### Install all required dependencies
 
-sudo apt-get -y install nano ntp unzip git build-essential libssl-dev libdb-dev libdb++-dev libboost-all-dev libqrencode-dev aptitude
-
+```sudo apt-get update && sudo apt-get upgrade
+sudo apt-get -y install nano ntp unzip git build-essential libssl-dev
+sudo apt-get -y install libdb-dev libdb++-dev libboost-all-dev libqrencode-dev aptitude
 sudo aptitude -y install miniupnpc libminiupnpc-dev
-
-If you get an error mentioning lock files, you probably have a desktop or background package update tool running that prevents other apt changes from happening. You can use the lsof utility to figure out what program holds the lock and then pause it from running.
+```
+ubuntu 18.04
+```
+sudo apt-get install libssl1.0-dev
+sudo apt-get install libqt4-dev
+```
+If you get an error mentioning lock files, you probably have a desktop or background package update tool running that prevents other apt changes from happening.  You can use the ```lsof``` utility to figure out what program holds the lock and then pause it from running.
 
 Pull the source code from github, or download it yourself:
-
-
+```
 git clone https://github.com/Coindev400/InfiniteRicks.git
+```
 
+### Compiling the software
 
-Compiling the software
 Now you compile the included leveldb:
-
+```
+chmod 777 -R InfiniteRicks
 cd InfiniteRicks/src/leveldb
-
-chmod +x build_detect_platform
-
 make clean
-
 make libleveldb.a libmemenv.a
-
+```
 Return to the source directory, and compile the daemon:
-
-
+```
 cd ..
-
 make -f makefile.unix
-
-
+```
 Strip the file to make it smaller, then relocate it:
-
+```
 strip InfiniteRicksd
-
 sudo cp InfiniteRicksd /usr/bin
-
+```
 Now run the daemon:
-
-
+```
 InfiniteRicksd
+```
+It should return an error, telling you to set up config file in a directory. 
 
-It should return an error, telling you to set up config file in a directory.
+## Create a config file
 
-Create a config file
 Now we’ll set up the config file. Note that this is case sensitive.
-
+```
 nano ~/.InfiniteRicks/InfiniteRicks.conf
-
+```
 Add the following, save and exit:
-
+```
 daemon=1
-
 server=1
-
 rpcuser=(username)
-
 rpcpassword=(strong password)
+```
 
-
-Run InfiniteRicksd once more and if you did everything correctly, your daemon is now online!
-
-config file example including addnodes
-
-------------------------------------------------
-
-daemon=1
-
-server=1
-
-rpcuser=username324324
-
-rpcpassword=password12345
-
-
-addnode=149.28.22.228
-addnode=94.54.153.10
-addnode=188.226.37.51
-addnode=105.103.165.35
-addnode=77.21.248.144
-addnode=85.95.188.181
-addnode=5.142.175.33
-addnode=95.90.227.52
-addnode=45.179.196.39
-addnode=31.41.98.108
-addnode=103.107.198.214
-addnode=76.187.164.207
-addnode=46.71.118.51
-addnode=31.220.54.64
-
-
---------------------------------------------
-
-Command summary
+Run InfiniteRicksd once more and if you did everything correctly, your daemon is now online! 
+## Command summary
 Type:
-
+```
 InfiniteRicksd help
+```
 for a full list of commands available.
-
 
 InfiniteRicks development tree
 
 InfiniteRicks is a PoS-based cryptocurrency.
 
-Development process
+## Development process
 ===========================
 
 Developers work in their own trees, then submit pull requests when
@@ -197,32 +151,35 @@ Issues with no commits will be given a similar warning, and closed after
 15 days from their last activity. Issues closed in this manner will be 
 labeled 'stale'.
 
-InfiniteRicks-qt: Qt5 GUI for InfiniteRicks
+## InfiniteRicks-qt: Qt5 GUI for InfiniteRicks
 
 Build instructions
 
 Debian
 
 First, make sure that the required packages for Qt5 development of your distribution are installed, for Debian and Ubuntu these are:
-
+```
 apt-get install qt5-default qt5-qmake qtbase5-dev-tools qttools5-dev-tools
 apt-get install build-essential libboost-dev libboost-system-dev
 apt-get install libboost-filesystem-dev libboost-program-options-dev libboost-thread-dev
 apt-get install libssl-dev libdb++-dev
-
- This Step is needed as well
+```
+## This Step is needed as well
+ ```
  sudo apt-get install libqt4-dev libminiupnpc-dev
-then execute the following:
-
-qmake
-make
+```
+## Then execute the following:
+```
+qmake RELEASE=1
+make STATIC=1
+```
 Alternatively, install Qt Creator and open the InfiniteRicks-qt.pro file.
 
 An executable named InfiniteRicks-qt will be built.
 
-Windows
+## Windows
 
-Windows build instructions:
+## Windows build instructions:
 
 Download the QT Windows SDK and install it. You don't need the Symbian stuff, just the desktop Qt.
 Compile openssl, boost and dbcxx.
@@ -240,8 +197,9 @@ Build configuration options
 UPNnP port forwarding
 
 To use UPnP for port forwarding behind a NAT router (recommended, as more connections overall allow for a faster and more stable InfiniteRicks experience), pass the following argument to qmake:
-
+```
 qmake "USE_UPNP=1"
+```
 (in Qt Creator, you can find the setting for additional qmake arguments under "Projects" -> "Build Settings" -> "Build Steps", then click "Details" next to qmake)
 
 This requires miniupnpc for UPnP port mapping. It can be downloaded from http://miniupnp.tuxfamily.org/files/. UPnP support is not compiled in by default.
