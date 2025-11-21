@@ -16,6 +16,7 @@ using namespace std;
 //
 
 extern unsigned int nMinerSleep;
+extern bool fStakeLowPriority;
 
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
 {
@@ -110,9 +111,9 @@ public:
 CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake, int64_t* pFees)
 {
     // Create new block
-    std::unique_ptr<CBlock> pblock = std::make_unique<CBlock>();
-    if (!pblock)
-    return nullptr;
+    auto_ptr<CBlock> pblock(new CBlock());
+    if (!pblock.get())
+        return NULL;
 
     CBlockIndex* pindexPrev = pindexBest;
 
@@ -180,8 +181,8 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake, int64_t* pFees)
 
         // This vector will be sorted into a priority queue:
         vector<TxPriority> vecPriority;
-        vecPriority.reserve(mempool.mapTx.size());
-        for (map<uint256, CTransaction>::iterator mi = mempool.mapTx.begin(); mi != mempool.mapTx.end(); ++mi)
+		vecPriority.reserve(mempool.mapTx.size());
+		for (map<uint256, CTransaction>::iterator mi = mempool.mapTx.begin(); mi != mempool.mapTx.end(); ++mi)
         {
             CTransaction& tx = (*mi).second;
             if (tx.IsCoinBase() || tx.IsCoinStake() || !IsFinalTx(tx, pindexPrev->nHeight + 1))
@@ -521,10 +522,11 @@ bool CheckStake(CBlock* pblock, CWallet& wallet)
 
 void StakeMiner(CWallet *pwallet)
 {
-    SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    if (fStakeLowPriority)
+        SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
     // Make this thread recognisable as the mining thread
-    RenameThread("InfiniteRicks-miner");
+    RenameThread("2X2-miner");
 
     bool fTryToSync = true;
 
@@ -564,7 +566,7 @@ void StakeMiner(CWallet *pwallet)
         // Create new block
         //
         int64_t nFees;
-        std::unique_ptr<CBlock> pblock(CreateNewBlock(pwallet, true, &nFees));
+        auto_ptr<CBlock> pblock(CreateNewBlock(pwallet, true, &nFees));
         if (!pblock.get())
             return;
 
@@ -573,7 +575,8 @@ void StakeMiner(CWallet *pwallet)
         {
             SetThreadPriority(THREAD_PRIORITY_NORMAL);
             CheckStake(pblock.get(), *pwallet);
-            SetThreadPriority(THREAD_PRIORITY_LOWEST);
+            if (fStakeLowPriority)
+                SetThreadPriority(THREAD_PRIORITY_LOWEST);
             MilliSleep(500);
         }
         else
