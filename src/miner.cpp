@@ -522,11 +522,10 @@ bool CheckStake(CBlock* pblock, CWallet& wallet)
 
 void StakeMiner(CWallet *pwallet)
 {
-    if (fStakeLowPriority)
-        SetThreadPriority(THREAD_PRIORITY_LOWEST);
+    SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
     // Make this thread recognisable as the mining thread
-    RenameThread("2X2-miner");
+    RenameThread("InfiniteRicks-miner");
 
     bool fTryToSync = true;
 
@@ -575,8 +574,7 @@ void StakeMiner(CWallet *pwallet)
         {
             SetThreadPriority(THREAD_PRIORITY_NORMAL);
             CheckStake(pblock.get(), *pwallet);
-            if (fStakeLowPriority)
-                SetThreadPriority(THREAD_PRIORITY_LOWEST);
+            SetThreadPriority(THREAD_PRIORITY_LOWEST);
             MilliSleep(500);
         }
         else
