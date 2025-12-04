@@ -37,7 +37,7 @@ const std::string CLIENT_NAME("InfiniteRicksCoin");
 #define GIT_ARCHIVE 1
 #ifdef GIT_ARCHIVE
 #    define GIT_COMMIT_ID "32a928e"
-#    define GIT_COMMIT_DATE "$Format:%cD"
+#    define GIT_COMMIT_DATE "2025-11-18 15:22 +0300"
 #endif
 
 #define BUILD_DESC_FROM_COMMIT(maj,min,rev,build,commit) \
