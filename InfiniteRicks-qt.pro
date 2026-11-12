@@ -487,10 +487,24 @@ macx:QMAKE_CXXFLAGS_THREAD += -pthread
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH
 LIBS += $$join(BOOST_LIB_PATH,,-L,) $$join(BDB_LIB_PATH,,-L,) $$join(OPENSSL_LIB_PATH,,-L,) $$join(QRENCODE_LIB_PATH,,-L,)
+# OpenSSL: prefer shared libraries on modern Linux
+unix:!macx:!android {
+    LIBS += -Wl,-Bdynamic
+}
+
 LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
 # -lgdi32 has to happen after -lcrypto (see  #681)
 windows:LIBS += -lws2_32 -lshlwapi -lmswsock -lole32 -loleaut32 -luuid -lgdi32 -lcrypt32 -lwinpthread -lz
-LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_THREAD_LIB_SUFFIX -lboost_chrono$$BOOST_LIB_SUFFIX
+# libboost_system is header-only since Boost 1.69; skip linking when absent (Ubuntu 24.04+).
+BOOST_SYSTEM_LIB = -lboost_system$$BOOST_LIB_SUFFIX
+unix:!macx:!android {
+    BOOST_SYSTEM_PRESENT = $$system(ldconfig -p 2>/dev/null | grep libboost_system || true)
+    isEmpty(BOOST_SYSTEM_PRESENT) {
+        BOOST_SYSTEM_LIB =
+        message(libboost_system not found; skipping -lboost_system \(header-only Boost\))
+    }
+}
+LIBS += $$BOOST_SYSTEM_LIB -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_THREAD_LIB_SUFFIX -lboost_chrono$$BOOST_LIB_SUFFIX
 
 contains(RELEASE, 1) {
     !windows:!macx:!android {
@@ -502,6 +516,37 @@ contains(RELEASE, 1) {
 !windows:!macx:!android {
     DEFINES += LINUX
     LIBS += -lrt -ldl
+}
+
+# OpenSSL (Ubuntu 26.04+) may need zlib/zstd/jitterentropy when linking
+# libcrypto.a. RELEASE=1 uses -Bstatic earlier, so force -Bdynamic here.
+# Prefer -dev linker names; fall back to runtime SONAMEs / static archive.
+unix:!android {
+    OPENSSL_EXTRA_ARCH = $$system(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+    LIBS += -Wl,-Bdynamic -lz
+
+    ZSTD_LINK_LIB = $$system(ls /usr/lib/$$OPENSSL_EXTRA_ARCH/libzstd.so /usr/lib/libzstd.so /usr/local/lib/libzstd.so 2>/dev/null | head -1)
+    ZSTD_SO1 = $$system(ls /usr/lib/$$OPENSSL_EXTRA_ARCH/libzstd.so.1 /usr/lib/libzstd.so.1 /usr/local/lib/libzstd.so.1 2>/dev/null | head -1)
+    !isEmpty(ZSTD_LINK_LIB) {
+        LIBS += -lzstd
+    } else:!isEmpty(ZSTD_SO1) {
+        LIBS += -l:libzstd.so.1
+        message(linking runtime $$ZSTD_SO1 \(install libzstd-dev for the libzstd.so symlink\))
+    }
+
+    JENT_LINK_LIB = $$system(ls /usr/lib/$$OPENSSL_EXTRA_ARCH/libjitterentropy.so /usr/lib/libjitterentropy.so /usr/local/lib/libjitterentropy.so 2>/dev/null | head -1)
+    JENT_SO = $$system(ls /usr/lib/$$OPENSSL_EXTRA_ARCH/libjitterentropy.so.* /usr/lib/libjitterentropy.so.* 2>/dev/null | head -1)
+    JENT_A = $$system(ls /usr/lib/$$OPENSSL_EXTRA_ARCH/libjitterentropy.a /usr/lib/libjitterentropy.a 2>/dev/null | head -1)
+    !isEmpty(JENT_LINK_LIB) {
+        LIBS += -ljitterentropy
+    } else:!isEmpty(JENT_SO) {
+        LIBS += -l:$$system(basename $$JENT_SO)
+        message(linking runtime $$JENT_SO \(install libjitterentropy3-dev if needed\))
+    } else:!isEmpty(JENT_A) {
+        LIBS += -l:libjitterentropy.a
+    } else {
+        message(libjitterentropy not found \(install libjitterentropy3-dev if OpenSSL needs jitter\))
+    }
 }
 
 # MinGW/MXE: Windows 'byte' typedef vs C++17 std::byte (must be last — overrides Qt mkspec c++17).

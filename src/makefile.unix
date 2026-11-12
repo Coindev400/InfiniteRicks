@@ -22,10 +22,27 @@ ifdef STATIC
 	endif
 endif
 
+# libboost_system became header-only in Boost 1.69 and is absent on Ubuntu 24.04+.
+# Link it only when the shared/static library is actually installed.
+BOOST_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+BOOST_SYSTEM_LIBFILE := $(firstword $(wildcard \
+  $(if $(BOOST_LIB_PATH),$(BOOST_LIB_PATH)/libboost_system$(BOOST_LIB_SUFFIX).so $(BOOST_LIB_PATH)/libboost_system$(BOOST_LIB_SUFFIX).a) \
+  /usr/lib/$(BOOST_MULTIARCH)/libboost_system$(BOOST_LIB_SUFFIX).so \
+  /usr/lib/$(BOOST_MULTIARCH)/libboost_system.so \
+  /usr/lib/libboost_system$(BOOST_LIB_SUFFIX).so \
+  /usr/lib/libboost_system.so \
+  /usr/local/lib/libboost_system$(BOOST_LIB_SUFFIX).so \
+  /usr/local/lib/libboost_system.so))
+ifneq ($(BOOST_SYSTEM_LIBFILE),)
+BOOST_SYSTEM_LIB := -l boost_system$(BOOST_LIB_SUFFIX)
+else
+BOOST_SYSTEM_LIB :=
+endif
+
 # for boost 1.37, add -mt to the boost libraries
 LIBS += \
  -Wl,-B$(LMODE) \
-   -l boost_system$(BOOST_LIB_SUFFIX) \
+   $(BOOST_SYSTEM_LIB) \
    -l boost_filesystem$(BOOST_LIB_SUFFIX) \
    -l boost_program_options$(BOOST_LIB_SUFFIX) \
    -l boost_thread$(BOOST_LIB_SUFFIX) \
@@ -42,9 +59,49 @@ ifneq (${USE_UPNP}, -)
 	DEFS += -DUSE_UPNP=$(USE_UPNP)
 endif
 
+# OpenSSL (Ubuntu 26.04+) may need zstd + jitterentropy after -lcrypto.
+# Prefer -dev linker names; fall back to runtime SONAMEs / static archive.
+ZSTD_LIBFILE := $(firstword $(wildcard \
+  /usr/lib/$(BOOST_MULTIARCH)/libzstd.so \
+  /usr/lib/libzstd.so \
+  /usr/local/lib/libzstd.so))
+ZSTD_SO1 := $(firstword $(wildcard \
+  /usr/lib/$(BOOST_MULTIARCH)/libzstd.so.1 \
+  /usr/lib/libzstd.so.1 \
+  /usr/local/lib/libzstd.so.1))
+ifneq ($(ZSTD_LIBFILE),)
+ZSTD_LIB := -l zstd
+else ifneq ($(ZSTD_SO1),)
+ZSTD_LIB := -l:libzstd.so.1
+else
+ZSTD_LIB :=
+endif
+
+JENT_LIBFILE := $(firstword $(wildcard \
+  /usr/lib/$(BOOST_MULTIARCH)/libjitterentropy.so \
+  /usr/lib/libjitterentropy.so \
+  /usr/local/lib/libjitterentropy.so))
+JENT_SO := $(firstword $(wildcard \
+  /usr/lib/$(BOOST_MULTIARCH)/libjitterentropy.so.* \
+  /usr/lib/libjitterentropy.so.*))
+JENT_A := $(firstword $(wildcard \
+  /usr/lib/$(BOOST_MULTIARCH)/libjitterentropy.a \
+  /usr/lib/libjitterentropy.a))
+ifneq ($(JENT_LIBFILE),)
+JENT_LIB := -l jitterentropy
+else ifneq ($(JENT_SO),)
+JENT_LIB := -l:$(notdir $(JENT_SO))
+else ifneq ($(JENT_A),)
+JENT_LIB := -l:libjitterentropy.a
+else
+JENT_LIB :=
+endif
+
 LIBS+= \
  -Wl,-B$(LMODE2) \
    -l z \
+   $(ZSTD_LIB) \
+   $(JENT_LIB) \
    -l dl \
    -l pthread
 
@@ -151,7 +208,7 @@ all: InfiniteRicksd InfiniteRicks-cli InfiniteRicks-tx
 
 TOOL_LIBS = \
  -Wl,-B$(LMODE) \
-   -l boost_system$(BOOST_LIB_SUFFIX) \
+   $(BOOST_SYSTEM_LIB) \
    -l boost_filesystem$(BOOST_LIB_SUFFIX) \
    -l boost_program_options$(BOOST_LIB_SUFFIX) \
    -l boost_thread$(BOOST_LIB_SUFFIX) \
@@ -160,6 +217,8 @@ TOOL_LIBS = \
    -l crypto \
  -Wl,-B$(LMODE2) \
    -l z \
+   $(ZSTD_LIB) \
+   $(JENT_LIB) \
    -l dl \
    -l pthread
 
